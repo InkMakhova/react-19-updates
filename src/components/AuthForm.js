@@ -1,57 +1,51 @@
-import { useState } from 'react'
+import { useActionState } from 'react'
 import { fakeLogin } from '../api'
 
 export default function AuthForm() {
-  const [pending, setPending] = useState(false)
-  const [password, setPassword] = useState('')
-  const [email, setEmail] = useState('')
-  const [error, setError] = useState(null)
-  const [result, setResult] = useState('')
+  // useActionState allows you to update state based on the result of a form action
+  const [state,submitAction] = useActionState(authorization, {
+    data: null,
+    error: null
+  })
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-
-    setPending(true)
-    setError(null)
-    setResult('')
+  // Function
+  async function authorization(prevState,formData) {
+    const email = formData.get('email');
+    const password = formData.get('password')
 
     try {
-      await fakeLogin({ email, password })
-      setResult('Email ' + email + ' logged in')
+      const response = await fakeLogin({ email, password })
+      return { data: response, error: null }
     } catch (e) {
-      setError(e.message)
-    } finally {
-      setPending(false)
+      return { ...prevState, error: e.message }
     }
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form action={submitAction}> {/* Change submit to action, each input should have name parameter */}
       <div className="input-field">
         <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           id="email"
           type="email"
           className="validate"
+          name="email"
         />
         <label htmlFor="email">Email</label>
       </div>
       <div className="input-field">
         <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           id="password"
           type="password"
           className="validate"
+          name="password"
         />
         <label htmlFor="password">Password</label>
       </div>
-      <button className="btn" type="submit" disabled={pending}>
-        {pending ? 'Loading...' : 'Submit'}
+      <button className="btn" type="submit"> {/* Pending status is temporary removed */}
+        {'Submit'}
       </button>
-      {result && <p>{result}</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {state.data && <p>{state.data.email} Logged in</p>}
+      {state.error && <p style={{ color: 'red' }}>{state.error}</p>}
     </form>
   )
 }
