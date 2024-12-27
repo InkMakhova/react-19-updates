@@ -1,6 +1,7 @@
-import { useImperativeHandle, useRef, forwardRef } from 'react'
+import { useImperativeHandle, useRef } from 'react'
 
-const AppInput = forwardRef(({ ref }) => {
+// No need to wrap component into forwardRef like it was in previous versions
+const AppInput = ({ ref }) => {
   const inputRef = useRef()
 
   useImperativeHandle(ref, () => ({
@@ -9,10 +10,10 @@ const AppInput = forwardRef(({ ref }) => {
 
   return (
     <div className="input-field">
-      <input ref={inputRef} />
+      <input ref={inputRef}/>
     </div>
   )
-})
+}
 
 export default function RefExample() {
   const ref = useRef()
