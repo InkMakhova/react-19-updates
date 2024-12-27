@@ -1,5 +1,19 @@
 import { useActionState } from 'react'
+import { useFormStatus } from 'react-dom';
 import { fakeLogin } from '../api'
+
+const SubmitButton = () => {
+  // Follow the form status:
+  // Component Submit button follow the parent component submit status
+  // Can contain parameters {pending, data, method, action}
+  const {pending} = useFormStatus()
+
+  return (
+    <button className="btn" type="submit" disabled={pending}>
+      {pending ? 'Loading...' : 'Submit'}
+    </button>
+  )
+}
 
 export default function AuthForm() {
   // useActionState allows you to update state based on the result of a form action
@@ -41,9 +55,7 @@ export default function AuthForm() {
         />
         <label htmlFor="password">Password</label>
       </div>
-      <button className="btn" type="submit"> {/* Pending status is temporary removed */}
-        {'Submit'}
-      </button>
+      <SubmitButton />
       {state.data && <p>{state.data.email} Logged in</p>}
       {state.error && <p style={{ color: 'red' }}>{state.error}</p>}
     </form>
