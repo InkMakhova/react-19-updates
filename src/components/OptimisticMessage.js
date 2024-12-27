@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useOptimistic } from 'react'
 
 async function sendMessage(message) {
   return new Promise((resolve) => {
@@ -12,7 +12,14 @@ export default function OptimisticMessage() {
   const formRef = useRef()
   const [messages, setMessages] = useState([])
 
+  // Add optimistic messages
+  const [optimisticMessages, addOptimisticMessage] = useOptimistic(messages, (prevMessages, newMessage) => {
+    return [...prevMessages, { text: newMessage, pending: true }]
+  })
+
   async function formAction(formData) {
+    // Call addOptimisticMessage at the beginning before the request
+    addOptimisticMessage(formData.get('message'))
     formRef.current.reset()
     const message = await sendMessage(formData.get('message'))
     setMessages((messages) => [...messages, { text: message, pending: false }])
@@ -26,7 +33,8 @@ export default function OptimisticMessage() {
         Send
       </button>
       <ul className="collection">
-        {messages.map((message, i) => (
+        {/* Change messages on optimisticMessages */}
+        {optimisticMessages.map((message, i) => (
           <li className="collection-item" key={i}>
             {message.text} {message.pending && <small>(Adding)</small>}
           </li>
